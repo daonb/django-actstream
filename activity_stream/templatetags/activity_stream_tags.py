@@ -31,7 +31,10 @@ def users_activity_stream(context, user, count, offset=0):
 	activity_items = ActivityStreamItem.objects.filter(actor=user, 
 						       subjects__isnull=False, 
 						       created_at__lte=datetime.datetime.now()).order_by('-created_at').distinct()[offset:count]
-	return {"activity_items": activity_items, "user": context["user"], "request":context["request"]}
+	return {"activity_items": activity_items, 
+            "user": context.get("user", None), 
+            "request": context.get("request", None),
+            }
 
 
 @register.inclusion_tag("activity_stream/friends_activity_stream.html", takes_context=True)
