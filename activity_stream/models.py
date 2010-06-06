@@ -91,22 +91,6 @@ class ActivityStreamItem(models.Model):
             'id': self.id
     })
 
-    def render(self):
-        from django.template.loader import get_template
-        from django.template import Template
-        from django.template import Context
-        t = get_template('activity_stream/%s/full%s.html'%(self.type.name,self.get_batch_suffix()))
-        html = t.render(Context({'activity_item': self}))
-        return html
-    get_absolute_url = models.permalink(get_absolute_url)
-    
-    def get_batch_suffix(self):
-        if self.is_batched:
-            return "_batched"
-        else:
-            return ""
-
-
 class ActivityStreamItemSubject(models.Model):
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()

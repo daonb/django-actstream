@@ -1,8 +1,9 @@
+{% load activity_stream_tags %}
 {% if activity_items %}
     <ul class="activity-stream">
         {% for activity_item in activity_items %}
             <li>
-                {{activity_item.render}} 
+                {% render_activity activity_item %} 
             </li>
         {% endfor %}
     </ul>

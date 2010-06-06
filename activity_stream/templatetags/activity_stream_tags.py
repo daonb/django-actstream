@@ -100,3 +100,12 @@ def is_following(parser, token):
     return IsFollowingNode(bits[0], bits[1], nodelist_true, nodelist_false)
 
 register.tag('if_is_following', is_following)
+
+@register.simple_tag
+def render_activity(activity):
+    batch_suffix = '_batched' if activity.is_batched else ''
+    template_name = 'activity_stream/%s/full%s.html' % \
+                     (activity.type.name, activity._meta.module_name, batch_suffix)
+    t = template.loader.get_template(template_name)
+    c = template.Context({'activity_item': activity})
+    return t.render(c)
