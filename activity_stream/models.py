@@ -69,9 +69,6 @@ class ActivityStreamItem(models.Model):
     actor = models.ForeignKey(User, related_name="activity_stream")
     type = models.ForeignKey(ActivityTypes, related_name="segments", blank=True,
                              null=True)
-
-    data = SerializedDataField(_('data'), blank=True, null=True)
-
     safetylevel = models.IntegerField(_('safetylevel'), choices=SAFETY_LEVELS,
                                       default=2, help_text=_('Who can see this?'))
     created_at      = models.DateTimeField(_('created at'), default=datetime.now)
@@ -114,6 +111,7 @@ class ActivityStreamItemSubject(models.Model):
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
     content_object = generic.GenericForeignKey()
+    data = SerializedDataField(_('data'), blank=True, null=True)
     activity_stream_item = models.ForeignKey(ActivityStreamItem,
                                              related_name="subjects")
 
@@ -157,14 +155,14 @@ def create_activity_item(type, user, subject, data=None, safetylevel=1, custom_d
         batchable_items = ActivityStreamItem.objects.filter(actor=user, type=type,
                   created_at__gt=cutoff_time).order_by('-created_at').all()[0:1]
         if batchable_items: # if no batchable items then just create a ActivityStreamItem below
-            batchable_items[0].subjects.create(content_object=subject)
+            batchable_items[0].subjects.create(content_object=subject, data=data)
             batchable_items[0].is_batched = True
             batchable_items[0].save()
             return batchable_items[0]
 
-    new_item = ActivityStreamItem.objects.create(actor=user, type=type, data=data,
+    new_item = ActivityStreamItem.objects.create(actor=user, type=type,
                                                  safetylevel=safetylevel)
-    new_item.subjects.create(content_object=subject)
+    new_item.subjects.create(content_object=subject, data=data)
     
     if custom_date:
         new_item.created_at = custom_date

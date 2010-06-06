@@ -41,16 +41,23 @@ class StoryTest(TestCase):
         c.login(username='admin', password='localhost')
         photo = TestSubject.objects.create(test=True)
         photo2 = TestSubject.objects.create(test=True)
-        photo.save()
-        activityItem1 = create_activity_item("placed", User.objects.get(username="admin"), photo)
+        data = {'name': 'photo'}
+        data2 = {'name': 'photo2'}
+        activityItem1 = create_activity_item("placed", User.objects.get(username="admin"), 
+                                             photo, data=data)
         self.assertTrue(activityItem1)
         self.assertEquals(activityItem1.is_batched, False)
-        self.assertEquals(activityItem1.subjects.count(), 1)
+        self.assertEquals(activityItem1.subjects.all()[0].content_object, photo)
+        self.assertEquals(activityItem1.subjects.all()[0].data, data)
 
-        activityItem2 = create_activity_item("placed", User.objects.get(username="admin"), photo2)
-        self.assertTrue(activityItem2)
+        activityItem2 = create_activity_item("placed", User.objects.get(username="admin"), 
+                                             photo2, data={'name': 'photo2'})
+        self.assertEquals(activityItem2, activityItem1)
         self.assertEquals(activityItem2.is_batched, True)
-        self.assertEquals(activityItem2.subjects.count(), 2)
+        self.assertEquals(activityItem1.subjects.all()[0].content_object, photo)
+        self.assertEquals(activityItem1.subjects.all()[0].data, data)
+        self.assertEquals(activityItem1.subjects.all()[1].content_object, photo2)
+        self.assertEquals(activityItem1.subjects.all()[1].data, data2)
 
         #activityItem2.delete()
         #activityItem2.delete()
