@@ -10,24 +10,19 @@ import datetime
 register = Library()
 
 @register.inclusion_tag("activity_stream/follower_list.html")
-def followed_by_him(user, count):
+def followed_by_him(user, count=20):
     followed = get_people_i_follow(user, count)
     return {"followed": followed}
 
 
 @register.inclusion_tag("activity_stream/following_list.html")
-def following_him(user, count):
+def following_him(user, count=20):
     fans = get_my_followers(user, count)
     return {"following": fans}
 
 
 @register.inclusion_tag("activity_stream/user_activity_stream.html", takes_context=True)
-def users_activity_stream(context, user, count, offset=0):
-	if not count:
-		count = 20
-		
-	if not offset:
-		offset=0
+def users_activity_stream(context, user, count=20, offset=0):
 	activity_items = ActivityStreamItem.objects.filter(actor=user, 
 						       subjects__isnull=False, 
 						       created_at__lte=datetime.datetime.now()).order_by('-created_at').distinct()[offset:count]
@@ -38,14 +33,7 @@ def users_activity_stream(context, user, count, offset=0):
 
 
 @register.inclusion_tag("activity_stream/friends_activity_stream.html", takes_context=True)
-def following_activity_stream(context, user, count, offset=0):
-	
-	if not count:
-		count = 20
-		
-	if not offset:
-		offset=0
-	
+def following_activity_stream(context, user, count=20, offset=0):
 	following =  get_people_i_follow(user, 1000)
 	following = list(following)
 	following.append(user)   
@@ -54,14 +42,7 @@ def following_activity_stream(context, user, count, offset=0):
 
 
 @register.inclusion_tag("activity_stream/global_activity_stream.html", takes_context=True)
-def global_activity_stream(context, count, offset=0, privacylevel=0):
-	
-	if not count:
-		count = 20
-		
-	if not offset:
-		offset=0
-		
+def global_activity_stream(context, count=20, offset=0, privacylevel=0):
 	activity_items = ActivityStreamItem.objects.filter(subjects__isnull=False,
 						created_at__lte=datetime.datetime.now()).order_by('-created_at').distinct()[offset:count]
 	
